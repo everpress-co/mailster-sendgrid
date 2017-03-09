@@ -3,7 +3,7 @@
 Plugin Name: Mailster SendGrid Integration
 Plugin URI: http://rxa.li/mailster?utm_campaign=wporg&utm_source=Mailster+SendGrid+Integration
 Description: Uses SendGrid to deliver emails for the Mailster Newsletter Plugin for WordPress.
-Version: 1.0
+Version: 1.0.1
 Author: revaxarts.com
 Author URI: https://mailster.co
 Text Domain: mailster-sendgrid
@@ -145,14 +145,14 @@ class MailsterSendGird {
 
 			$mailobject->sendgrid_object = array(
 				'from' => $mailobject->from,
-				'fromname' => $mailobject->from_name,
+				'fromname' => stripslashes($mailobject->from_name),
 				'replyto' => $mailobject->reply_to,
 				// doesn't work right now
 				// 'returnpath' => $mailobject->bouncemail,
 				'to' => $mailobject->to,
-				'subject' => $mailobject->subject,
-				'text' => $mailobject->mailer->AltBody,
-				'html' => $mailobject->mailer->Body,
+				'subject' => stripslashes($mailobject->subject),
+				'text' => stripslashes($mailobject->mailer->AltBody),
+				'html' => stripslashes($mailobject->mailer->Body),
 				'api_user' => mailster_option( MAILSTER_SENDGRID_ID . '_user' ),
 				'api_key' => mailster_option( MAILSTER_SENDGRID_ID . '_pwd' ),
 				'files' => array(),
@@ -509,7 +509,8 @@ class MailsterSendGird {
 			if ( ! wp_next_scheduled( 'mailster_sendgrid_cron' ) ) {
 				// reset on 00:00 PST ( GMT -8 ) == GMT +16
 				$timeoffset = strtotime( 'midnight' ) + ( ( 24 -8 ) * HOUR_IN_SECONDS );
-				if ( $timeoffset < time() ) { $timeoffset + ( 24 * HOUR_IN_SECONDS );
+				if ( $timeoffset < time() ) {
+					$timeoffset + ( 24 * HOUR_IN_SECONDS );
 				}
 				wp_schedule_event( $timeoffset, 'daily', 'mailster_sendgrid_cron' );
 			}

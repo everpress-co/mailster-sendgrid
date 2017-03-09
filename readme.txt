@@ -2,8 +2,8 @@
 Contributors: everpress, revaxarts
 Tags: sendgrid, mailster, delivery, deliverymethod, newsletter, email, revaxarts, mailsteresp
 Requires at least: 3.8
-Tested up to: 4.7.2
-Stable tag: 1.0
+Tested up to: 4.7.3
+Stable tag: 1.0.1
 License: GPLv2 or later
 Author: revaxarts
 Author URI: https://mailster.co
@@ -23,6 +23,9 @@ Uses SendGrid to deliver emails for the [Mailster Newsletter Plugin for WordPres
 5. Send a testmail
 
 == Changelog ==
+
+= 1.0.1 =
+* fixed: issue with slashes in content when using the WEB API
 
 = 1.0 =
 * initial release
