@@ -1,8 +1,8 @@
 === Mailster SendGrid Integration ===
 Contributors: everpress, revaxarts
-Tags: sendgrid, mailster, delivery, deliverymethod, newsletter, email, revaxarts, mailsteresp
+Tags: mailster, delivery, newsletter, email, mailsteresp
 Requires at least: 3.8
-Tested up to: 4.7.3
+Tested up to: 4.8
 Stable tag: 1.0.1
 License: GPLv2 or later
 Author: revaxarts
@@ -10,9 +10,9 @@ Author URI: https://mailster.co
 
 == Description ==
 
-> This Plugin requires [Mailster Newsletter Plugin for WordPress](http://rxa.li/mailster?utm_campaign=wporg&utm_source=SendGrid+integration+for+Mailster)
+Uses SendGrid to deliver emails for the [Mailster Newsletter Plugin for WordPress](https://mailster.co/?utm_campaign=wporg&utm_source=SendGrid+integration+for+Mailster).
 
-Uses SendGrid to deliver emails for the [Mailster Newsletter Plugin for WordPress](http://rxa.li/mailster?utm_campaign=wporg&utm_source=SendGrid+integration+for+Mailster).
+> This Plugin requires [Mailster Newsletter Plugin for WordPress](https://mailster.co/?utm_campaign=wporg&utm_source=SendGrid+integration+for+Mailster)
 
 == Installation ==
 
@@ -32,4 +32,4 @@ Uses SendGrid to deliver emails for the [Mailster Newsletter Plugin for WordPres
 
 == Additional Info One ==
 
-This Plugin requires [Mailster Newsletter Plugin for WordPress](http://rxa.li/mailster?utm_campaign=wporg&utm_source=SendGrid+integration+for+Mailster)
+This Plugin requires [Mailster Newsletter Plugin for WordPress](https://mailster.co/?utm_campaign=wporg&utm_source=SendGrid+integration+for+Mailster)

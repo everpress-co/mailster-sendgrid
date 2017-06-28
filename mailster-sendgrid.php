@@ -1,22 +1,22 @@
 <?php
 /*
 Plugin Name: Mailster SendGrid Integration
-Plugin URI: http://rxa.li/mailster?utm_campaign=wporg&utm_source=Mailster+SendGrid+Integration
+Plugin URI: https://mailster.co/?utm_campaign=wporg&utm_source=Mailster+SendGrid+Integration
 Description: Uses SendGrid to deliver emails for the Mailster Newsletter Plugin for WordPress.
 Version: 1.0.1
-Author: revaxarts.com
+Author: EverPress
 Author URI: https://mailster.co
 Text Domain: mailster-sendgrid
 License: GPLv2 or later
 */
 
 
-define( 'MAILSTER_SENDGRID_VERSION', '1.0' );
+define( 'MAILSTER_SENDGRID_VERSION', '1.0.1' );
 define( 'MAILSTER_SENDGRID_REQUIRED_VERSION', '2.2' );
 define( 'MAILSTER_SENDGRID_ID', 'sendgrid' );
 
 
-class MailsterSendGird {
+class MailsterSendGrid {
 
 	private $plugin_path;
 	private $plugin_url;
@@ -145,14 +145,14 @@ class MailsterSendGird {
 
 			$mailobject->sendgrid_object = array(
 				'from' => $mailobject->from,
-				'fromname' => stripslashes($mailobject->from_name),
+				'fromname' => stripslashes( $mailobject->from_name ),
 				'replyto' => $mailobject->reply_to,
 				// doesn't work right now
 				// 'returnpath' => $mailobject->bouncemail,
 				'to' => $mailobject->to,
-				'subject' => stripslashes($mailobject->subject),
-				'text' => stripslashes($mailobject->mailer->AltBody),
-				'html' => stripslashes($mailobject->mailer->Body),
+				'subject' => stripslashes( $mailobject->subject ),
+				'text' => stripslashes( $mailobject->mailer->AltBody ),
+				'html' => stripslashes( $mailobject->mailer->Body ),
 				'api_user' => mailster_option( MAILSTER_SENDGRID_ID . '_user' ),
 				'api_key' => mailster_option( MAILSTER_SENDGRID_ID . '_pwd' ),
 				'files' => array(),
@@ -535,7 +535,7 @@ class MailsterSendGird {
 
 				if ( $options[ MAILSTER_SENDGRID_ID . '_bouncehandling' ] != 'sendgrid' ) {
 					add_settings_error( 'mailster_options', 'mailster_options', __( 'It is currently not possible to handle bounces with Mailster when using the WEB API', 'mailster-sendgrid' ) );
-					$options[ MAILSTER_SENDGRID_ID . '_bouncehandling' ] = 'sendgird';
+					$options[ MAILSTER_SENDGRID_ID . '_bouncehandling' ] = 'sendgrid';
 				}
 			}
 
@@ -758,7 +758,7 @@ class MailsterSendGird {
 	?>
 	<div id="message" class="error">
 	  <p>
-	   <strong>SendGrid integration for Mailster</strong> requires the <a href="http://rxa.li/mailster?utm_campaign=wporg&utm_source=SendGrid+integration+for+Mailster">Mailster Newsletter Plugin</a>, at least version <strong><?php echo MAILSTER_SENDGRID_REQUIRED_VERSION ?></strong>.
+	   <strong>SendGrid integration for Mailster</strong> requires the <a href="https://mailster.co/?utm_campaign=wporg&utm_source=SendGrid+integration+for+Mailster">Mailster Newsletter Plugin</a>, at least version <strong><?php echo MAILSTER_SENDGRID_REQUIRED_VERSION ?></strong>.
 	  </p>
 	</div>
 	<?php
@@ -803,4 +803,4 @@ class MailsterSendGird {
 }
 
 
-new MailsterSendGird();
+new MailsterSendGrid();
