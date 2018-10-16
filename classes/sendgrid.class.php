@@ -143,8 +143,7 @@ class MailsterSendGrid {
 					'name' => $mailobject->from_name,
 				),
 				'reply_to' => array(
-					'email' => $mailobject->reply_to,
-					'name' => $mailobject->from_name,
+					'email' => $mailobject->reply_to ? $mailobject->reply_to : $mailobject->from,
 				),
 				'subject' => $mailobject->subject,
 				'content' => array(
