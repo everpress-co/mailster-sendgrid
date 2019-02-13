@@ -1,9 +1,9 @@
 === Mailster SendGrid Integration ===
-Contributors: everpress, revaxarts
+Contributors: everpress
 Tags: mailster, delivery, newsletter, email, mailsteresp
 Requires at least: 3.8
 Tested up to: 4.9.8
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 License: GPLv2 or later
 Author: revaxarts
 Author URI: https://mailster.co
@@ -23,6 +23,9 @@ Uses SendGrid to deliver emails for the [Mailster Newsletter Plugin for WordPres
 5. Send a testmail
 
 == Changelog ==
+
+ = 2.0.2 =
+* fixed: issue with Mailster 2.3.16+ and reply_to headers
 
 = 2.0.1 =
 * fixed: undefined reply_to email address

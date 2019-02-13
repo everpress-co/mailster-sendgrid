@@ -142,9 +142,6 @@ class MailsterSendGrid {
 					'email' => $mailobject->from,
 					'name' => $mailobject->from_name,
 				),
-				'reply_to' => array(
-					'email' => $mailobject->reply_to ? $mailobject->reply_to : $mailobject->from,
-				),
 				'subject' => $mailobject->subject,
 				'content' => array(
 					array(
@@ -164,6 +161,14 @@ class MailsterSendGrid {
 				),
 
 			);
+
+			$reply_to = is_array( $mailobject->reply_to ) ? reset( $mailobject->reply_to ) : $mailobject->reply_to;
+
+			if ( $reply_to ) {
+				$mailobject->sendgrid_object['reply_to'] = array(
+					'email' => $reply_to,
+				);
+			}
 
 			$categories = mailster_option( 'sendgrid_categories' );
 			if ( ! empty( $categories ) ) {
