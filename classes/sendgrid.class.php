@@ -8,7 +8,7 @@ class MailsterSendGrid {
 	public function __construct() {
 
 		$this->plugin_path = plugin_dir_path( MAILSTER_SENDGRID_FILE );
-		$this->plugin_url = plugin_dir_url( MAILSTER_SENDGRID_FILE );
+		$this->plugin_url  = plugin_dir_url( MAILSTER_SENDGRID_FILE );
 
 		register_activation_hook( MAILSTER_SENDGRID_FILE, array( &$this, 'activate' ) );
 		register_deactivation_hook( MAILSTER_SENDGRID_FILE, array( &$this, 'deactivate' ) );
@@ -73,13 +73,13 @@ class MailsterSendGrid {
 
 			$secure = mailster_option( 'sendgrid_secure' );
 
-			$mailobject->mailer->Mailer = 'smtp';
-			$mailobject->mailer->SMTPSecure = $secure ? 'ssl' : 'none';
-			$mailobject->mailer->Host = 'smtp.sendgrid.net';
-			$mailobject->mailer->Port = $secure ? 465 : 587;
-			$mailobject->mailer->SMTPAuth = true;
-			$mailobject->mailer->Username = 'apikey';
-			$mailobject->mailer->Password = mailster_option( 'sendgrid_apikey' );
+			$mailobject->mailer->Mailer        = 'smtp';
+			$mailobject->mailer->SMTPSecure    = $secure ? 'ssl' : 'none';
+			$mailobject->mailer->Host          = 'smtp.sendgrid.net';
+			$mailobject->mailer->Port          = $secure ? 465 : 587;
+			$mailobject->mailer->SMTPAuth      = true;
+			$mailobject->mailer->Username      = 'apikey';
+			$mailobject->mailer->Password      = mailster_option( 'sendgrid_apikey' );
 			$mailobject->mailer->SMTPKeepAlive = true;
 
 		} elseif ( $method == 'web' ) {
@@ -126,7 +126,7 @@ class MailsterSendGrid {
 
 			foreach ( $mailobject->to as $i => $to ) {
 				$recipients[] = (object) array(
-					'name' => $mailobject->to_name[ $i ] ? $mailobject->to_name[ $i ] : null,
+					'name'  => $mailobject->to_name[ $i ] ? $mailobject->to_name[ $i ] : null,
 					'email' => $mailobject->to[ $i ] ? $mailobject->to[ $i ] : null,
 				);
 
@@ -134,30 +134,30 @@ class MailsterSendGrid {
 
 			$mailobject->sendgrid_object = array(
 				'personalizations' => array(
-						array(
+					array(
 						'to' => $recipients,
 					),
 				),
-				'from' => array(
+				'from'             => array(
 					'email' => $mailobject->from,
-					'name' => $mailobject->from_name,
+					'name'  => $mailobject->from_name,
 				),
-				'subject' => $mailobject->subject,
-				'content' => array(
+				'subject'          => $mailobject->subject,
+				'content'          => array(
 					array(
-						'type' => 'text/plain',
+						'type'  => 'text/plain',
 						'value' => $mailobject->mailer->AltBody,
 					),
 					array(
-						'type' => 'text/html',
+						'type'  => 'text/html',
 						'value' => $mailobject->mailer->Body,
 					),
 				),
-				'custom_args' => (object) array(
-					'mailster_id' => (string) mailster_option( 'ID' ),
-					'campaign_id' => (string) $mailobject->campaignID,
+				'custom_args'      => (object) array(
+					'mailster_id'   => (string) mailster_option( 'ID' ),
+					'campaign_id'   => (string) $mailobject->campaignID,
 					'subscriber_id' => (string) $mailobject->subscriberID,
-					'message_id' => (string) $mailobject->messageID,
+					'message_id'    => (string) $mailobject->messageID,
 				),
 
 			);
@@ -187,9 +187,9 @@ class MailsterSendGrid {
 				foreach ( $attachments as $attachment ) {
 					if ( file_exists( $attachment[0] ) ) {
 						$object = (object) array(
-							'content' => base64_encode( file_get_contents( $attachment[0] ) ),
-							'filename' => $attachment[1],
-							'type' => $attachment[4],
+							'content'     => base64_encode( file_get_contents( $attachment[0] ) ),
+							'filename'    => $attachment[1],
+							'type'        => $attachment[4],
 							'disposition' => $attachment[6],
 						);
 
@@ -279,13 +279,13 @@ class MailsterSendGrid {
 	public function embedd_images( $message ) {
 
 		$return = array(
-			'files' => array(),
+			'files'   => array(),
 			'content' => array(),
-			'html' => $message,
+			'html'    => $message,
 		);
 
 		$upload_folder = wp_upload_dir();
-		$folder = $upload_folder['basedir'];
+		$folder        = $upload_folder['basedir'];
 
 		preg_match_all( "/(src|background)=[\"']([^\"']+)[\"']/Ui", $message, $images );
 
@@ -304,14 +304,14 @@ class MailsterSendGrid {
 				if ( ! file_exists( $folder . '/' . $url ) ) {
 					continue;
 				}
-				$filename = basename( $url );
+				$filename  = basename( $url );
 				$directory = dirname( $url );
 				if ( $directory == '.' ) {
 					$directory = '';
 				}
-				$cid = md5( $folder . '/' . $url . time() );
-				$return['html'] = str_replace( $url, 'cid:' . $cid, $return['html'] );
-				$return['files'][ $filename ] = file_get_contents( $folder . '/' . $url );
+				$cid                            = md5( $folder . '/' . $url . time() );
+				$return['html']                 = str_replace( $url, 'cid:' . $cid, $return['html'] );
+				$return['files'][ $filename ]   = file_get_contents( $folder . '/' . $url );
 				$return['content'][ $filename ] = $cid;
 			}
 		}
@@ -465,18 +465,18 @@ class MailsterSendGrid {
 
 		$now = time();
 
-		if ( ! ($last_bounce_check = get_transient( '_mailster_sendgrid_last_bounce_check' )) ) {
+		if ( ! ( $last_bounce_check = get_transient( '_mailster_sendgrid_last_bounce_check' ) ) ) {
 			set_transient( '_mailster_sendgrid_last_bounce_check', $now );
 			$last_bounce_check = $now;
 		}
 
-		$collection = array();
+		$collection    = array();
 		$errormessages = array();
 
 		$response = $this->do_get( 'suppression/bounces', array( 'start_time' => $last_bounce_check ) );
 
 		if ( is_wp_error( $response ) ) {
-			$errormessages[] = sprintf( __( 'Cannot read Bounces: %s', 'mailster-sendgrid' ), $response->get_error_message() );
+			$errormessages[]       = sprintf( __( 'Cannot read Bounces: %s', 'mailster-sendgrid' ), $response->get_error_message() );
 			$collection['bounces'] = array();
 		} else {
 			$collection['bounces'] = (array) $response;
@@ -485,7 +485,7 @@ class MailsterSendGrid {
 		$response = $this->do_get( 'suppression/blocks', array( 'start_time' => $last_bounce_check ) );
 
 		if ( is_wp_error( $response ) ) {
-			$errormessages[] = sprintf( __( 'Cannot read Blocks: %s', 'mailster-sendgrid' ), $response->get_error_message() );
+			$errormessages[]      = sprintf( __( 'Cannot read Blocks: %s', 'mailster-sendgrid' ), $response->get_error_message() );
 			$collection['blocks'] = array();
 		} else {
 			$collection['blocks'] = (array) $response;
@@ -494,7 +494,7 @@ class MailsterSendGrid {
 		$response = $this->do_get( 'suppression/spam_reports', array( 'start_time' => $last_bounce_check ) );
 
 		if ( is_wp_error( $response ) ) {
-			$errormessages[] = sprintf( __( 'Cannot read Spam reports: %s', 'mailster-sendgrid' ), $response->get_error_message() );
+			$errormessages[]            = sprintf( __( 'Cannot read Spam reports: %s', 'mailster-sendgrid' ), $response->get_error_message() );
 			$collection['spam_reports'] = array();
 		} else {
 			$collection['spam_reports'] = (array) $response;
@@ -503,7 +503,7 @@ class MailsterSendGrid {
 		$response = $this->do_get( 'suppression/unsubscribes', array( 'start_time' => $last_bounce_check ) );
 
 		if ( is_wp_error( $response ) ) {
-			$errormessages[] = sprintf( __( 'Cannot read Unsubscribes: %s', 'mailster-sendgrid' ), $response->get_error_message() );
+			$errormessages[]            = sprintf( __( 'Cannot read Unsubscribes: %s', 'mailster-sendgrid' ), $response->get_error_message() );
 			$collection['unsubscribes'] = array();
 		} else {
 			$collection['unsubscribes'] = (array) $response;
@@ -518,8 +518,8 @@ class MailsterSendGrid {
 				// only if user exists
 				if ( $subscriber && $subscriber->status == 1 ) {
 
-					$campaigns = mailster( 'subscribers' )->get_sent_campaigns( $subscriber->ID );
-					$campaigns = array_reverse( $campaigns );
+					$campaigns    = mailster( 'subscribers' )->get_sent_campaigns( $subscriber->ID );
+					$campaigns    = array_reverse( $campaigns );
 					$campaign_ids = wp_list_pluck( $campaigns, 'campaign_id' );
 
 					if ( 'unsubscribes' == $type ) {
@@ -582,10 +582,10 @@ class MailsterSendGrid {
 	 */
 	private function do_call( $method, $endpoint, $args = array(), $timeout = 15 ) {
 
-		$url = 'https://api.sendgrid.com/v3/' . $endpoint ;
+		$url = 'https://api.sendgrid.com/v3/' . $endpoint;
 
-		$args = wp_parse_args( $args, array() );
-		$body = null;
+		$args   = wp_parse_args( $args, array() );
+		$body   = null;
 		$apikey = isset( $this->apikey ) ? $this->apikey : mailster_option( 'sendgrid_apikey' );
 
 		if ( 'GET' == $method ) {
@@ -598,15 +598,18 @@ class MailsterSendGrid {
 
 		$headers = array(
 			'Authorization' => 'Bearer ' . $apikey,
-			'Content-Type' => 'application/json',
+			'Content-Type'  => 'application/json',
 		);
 
-		$response = wp_remote_request( $url, array(
-			'method' => $method,
-			'headers' => $headers,
-			'timeout' => $timeout,
-			'body' => $body,
-		) );
+		$response = wp_remote_request(
+			$url,
+			array(
+				'method'  => $method,
+				'headers' => $headers,
+				'timeout' => $timeout,
+				'body'    => $body,
+			)
+		);
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -640,10 +643,10 @@ class MailsterSendGrid {
 			return;
 		}
 
-	?>
+		?>
 		<div class="error inline"><p><strong><?php _e( 'Bouncing is handled by SendGrid so all your settings will be ignored', 'mailster-sendgrid' ); ?></strong></p></div>
 
-	<?php
+		<?php
 	}
 
 
@@ -655,13 +658,13 @@ class MailsterSendGrid {
 	 * @return void
 	 */
 	public function notice() {
-	?>
+		?>
 	<div id="message" class="error">
 	  <p>
-	   <strong>SendGrid integration for Mailster</strong> requires the <a href="https://mailster.co/?utm_campaign=wporg&utm_source=SendGrid+integration+for+Mailster">Mailster Newsletter Plugin</a>, at least version <strong><?php echo MAILSTER_SENDGRID_REQUIRED_VERSION ?></strong>.
+	   <strong>SendGrid integration for Mailster</strong> requires the <a href="https://mailster.co/?utm_campaign=wporg&utm_source=SendGrid+integration+for+Mailster">Mailster Newsletter Plugin</a>, at least version <strong><?php echo MAILSTER_SENDGRID_REQUIRED_VERSION; ?></strong>.
 	  </p>
 	</div>
-	<?php
+		<?php
 	}
 
 
@@ -679,10 +682,10 @@ class MailsterSendGrid {
 			mailster_notice( sprintf( __( 'Change the delivery method on the %s!', 'mailster-sendgrid' ), '<a href="edit.php?post_type=newsletter&page=mailster_settings&mailster_remove_notice=delivery_method#delivery">Settings Page</a>' ), '', 7200, 'delivery_method' );
 
 			$defaults = array(
-				'sendgrid_apikey' => null,
-				'sendgrid_api' => 'web',
+				'sendgrid_apikey'         => null,
+				'sendgrid_api'            => 'web',
 				'sendgrid_bouncehandling' => 'sendgrid',
-				'sendgrid_verified' => false,
+				'sendgrid_verified'       => false,
 			);
 
 			$mailster_options = mailster_options();
