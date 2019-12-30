@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Mailster SendGrid Integration
-Plugin URI: https://mailster.co/?utm_campaign=wporg&utm_source=Mailster+SendGrid+Integration
+Plugin URI: https://mailster.co/?utm_campaign=wporg&utm_source=Mailster+SendGrid+Integration&utm_medium=plugin
 Description: Uses SendGrid to deliver emails for the Mailster Newsletter Plugin for WordPress.
 Version: 2.0.2
 Author: EverPress
