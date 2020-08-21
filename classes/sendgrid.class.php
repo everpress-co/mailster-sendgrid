@@ -176,6 +176,9 @@ class MailsterSendGrid {
 			}
 
 			if ( ! empty( $mailobject->headers ) ) {
+				if ( isset( $mailobject->headers['X-Mailster-Campaign'] ) ) {
+					$mailobject->headers['X-Mailster-Campaign'] = (string) $mailobject->headers['X-Mailster-Campaign'];
+				}
 				$mailobject->sendgrid_object['headers'] = $mailobject->headers;
 			}
 
