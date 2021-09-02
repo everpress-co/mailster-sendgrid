@@ -156,6 +156,7 @@ class MailsterSendGrid {
 				'custom_args'      => (object) array(
 					'mailster_id'   => (string) mailster_option( 'ID' ),
 					'campaign_id'   => (string) $mailobject->campaignID,
+					'index'         => (string) $mailobject->index,
 					'subscriber_id' => (string) $mailobject->subscriberID,
 					'message_id'    => (string) $mailobject->messageID,
 				),
@@ -235,7 +236,11 @@ class MailsterSendGrid {
 
 			if ( ! isset( $mailobject->sendgrid_object ) ) {
 				$mailobject->set_error( __( 'SendGrid options not defined', 'mailster-sendgrid' ) );
-				return false;
+				return;
+			}
+			if ( empty( $mailobject->sendgrid_object['subject'] ) ) {
+				$mailobject->set_error( __( 'SendGrid requires a subject', 'mailster-sendgrid' ) );
+				return;
 			}
 
 			$response = $this->do_post( 'mail/send', $mailobject->sendgrid_object );
@@ -647,7 +652,7 @@ class MailsterSendGrid {
 		}
 
 		?>
-		<div class="error inline"><p><strong><?php _e( 'Bouncing is handled by SendGrid so all your settings will be ignored', 'mailster-sendgrid' ); ?></strong></p></div>
+		<div class="error inline"><p><strong><?php esc_html_e( 'Bouncing is handled by SendGrid so all your settings will be ignored', 'mailster-sendgrid' ); ?></strong></p></div>
 
 		<?php
 	}
@@ -682,7 +687,7 @@ class MailsterSendGrid {
 
 		if ( function_exists( 'mailster' ) ) {
 
-			mailster_notice( sprintf( __( 'Change the delivery method on the %s!', 'mailster-sendgrid' ), '<a href="edit.php?post_type=newsletter&page=mailster_settings&mailster_remove_notice=delivery_method#delivery">Settings Page</a>' ), '', 7200, 'delivery_method' );
+			mailster_notice( sprintf( __( 'Change the delivery method on the %s!', 'mailster-sendgrid' ), '<a href="edit.php?post_type=newsletter&page=mailster_settings&mailster_remove_notice=delivery_method#delivery">Settings Page</a>' ), '', 360, 'delivery_method' );
 
 			$defaults = array(
 				'sendgrid_apikey'         => null,
@@ -715,7 +720,7 @@ class MailsterSendGrid {
 		if ( function_exists( 'mailster' ) ) {
 			if ( mailster_option( 'deliverymethod' ) == 'sendgrid' ) {
 				mailster_update_option( 'deliverymethod', 'simple' );
-				mailster_notice( sprintf( __( 'Change the delivery method on the %s!', 'mailster-sendgrid' ), '<a href="edit.php?post_type=newsletter&page=mailster_settings&mailster_remove_notice=delivery_method#delivery">Settings Page</a>' ), '', 7200, 'delivery_method' );
+				mailster_notice( sprintf( __( 'Change the delivery method on the %s!', 'mailster-sendgrid' ), '<a href="edit.php?post_type=newsletter&page=mailster_settings&mailster_remove_notice=delivery_method#delivery">Settings Page</a>' ), '', 360, 'delivery_method' );
 			}
 		}
 	}
