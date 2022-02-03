@@ -6,6 +6,7 @@ Tested up to: 5.9
 Stable tag: 2.1
 License: GPLv2 or later
 
+
 == Description ==
 
 Uses SendGrid to deliver emails for the [Mailster Newsletter Plugin for WordPress](https://mailster.co/?utm_campaign=wporg&utm_source=SendGrid+integration+for+Mailster&utm_medium=readme).
