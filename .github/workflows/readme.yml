@@ -1,18 +1,20 @@
-name: Convert Readme
+name: Plugin asset/readme update
 on:
   push:
     branches:
       - 'develop'
     paths:
-      - 'readme.txt'
+      - 'README.md'
+      - '.wordpress-org/**'
 jobs:
-  tag:
-    name: Convert Readme
+  trunk:
+    name: Update Assets and Readme
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@master
-      - name: Convert Readme
-        uses: evrpress/action-wp2md@main
+      - uses: actions/checkout@master
+      - uses: evrpress/action-wordpress-plugin-readme-screenshot-update@main
+      - name: WordPress.org plugin asset/readme update
+        uses: evrpress/action-wordpress-plugin-asset-update@develop
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          README_NAME: README.md
