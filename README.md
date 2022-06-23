@@ -3,7 +3,7 @@
 Contributors: everpress  
 Tags: mailster, delivery, newsletter, email, mailsteresp  
 Requires at least: 3.8  
-Tested up to: 5.9  
+Tested up to: 6.0  
 Stable tag: 2.1  
 License: GPLv2 or later
 
