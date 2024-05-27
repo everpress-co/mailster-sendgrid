@@ -4,6 +4,7 @@ class MailsterSendGrid {
 
 	private $plugin_path;
 	private $plugin_url;
+	private $apikey;
 
 	public function __construct() {
 
@@ -52,7 +53,6 @@ class MailsterSendGrid {
 				}
 			}
 		}
-
 	}
 
 
@@ -88,7 +88,6 @@ class MailsterSendGrid {
 
 		// SendGrid will handle DKIM integration
 		$mailobject->dkim = false;
-
 	}
 
 
@@ -210,7 +209,6 @@ class MailsterSendGrid {
 				}
 			}
 		}
-
 	}
 
 
@@ -269,7 +267,6 @@ class MailsterSendGrid {
 	public function reset() {
 		update_option( '_transient__mailster_send_period_timeout', false );
 		update_option( '_transient__mailster_send_period', 0 );
-
 	}
 
 
@@ -357,7 +354,6 @@ class MailsterSendGrid {
 		$verified = mailster_option( 'sendgrid_verified' );
 
 		include $this->plugin_path . '/views/settings.php';
-
 	}
 
 	/**
@@ -380,7 +376,6 @@ class MailsterSendGrid {
 		} else {
 			return true;
 		}
-
 	}
 
 
@@ -440,12 +435,10 @@ class MailsterSendGrid {
 
 					}
 				}
-			} else {
+			} elseif ( $options['sendgrid_bouncehandling'] != 'sendgrid' ) {
 
-				if ( $options['sendgrid_bouncehandling'] != 'sendgrid' ) {
 					add_settings_error( 'mailster_options', 'mailster_options', __( 'It is currently not possible to handle bounces with Mailster when using the WEB API', 'mailster-sendgrid' ) );
 					$options['sendgrid_bouncehandling'] = 'sendgrid';
-				}
 			}
 
 			if ( $options['sendgrid_bouncehandling'] != 'sendgrid' ) {
@@ -632,7 +625,6 @@ class MailsterSendGrid {
 		}
 
 		return $body;
-
 	}
 
 
@@ -668,9 +660,9 @@ class MailsterSendGrid {
 	public function notice() {
 		?>
 	<div id="message" class="error">
-	  <p>
-	   <strong>SendGrid integration for Mailster</strong> requires the <a href="https://mailster.co/?utm_campaign=wporg&utm_source=SendGrid+integration+for+Mailster&utm_medium=plugin">Mailster Newsletter Plugin</a>, at least version <strong><?php echo MAILSTER_SENDGRID_REQUIRED_VERSION; ?></strong>.
-	  </p>
+		<p>
+		<strong>SendGrid integration for Mailster</strong> requires the <a href="https://mailster.co/?utm_campaign=wporg&utm_source=wordpress.org&utm_medium=plugin&utm_term=SendGrid">Mailster Newsletter Plugin</a>, at least version <strong><?php echo MAILSTER_SENDGRID_REQUIRED_VERSION; ?></strong>.
+		</p>
 	</div>
 		<?php
 	}
@@ -724,6 +716,4 @@ class MailsterSendGrid {
 			}
 		}
 	}
-
-
 }
