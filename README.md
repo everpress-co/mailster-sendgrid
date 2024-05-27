@@ -1,10 +1,10 @@
 # Mailster SendGrid Integration
 
-Contributors: everpress, xaverb  
+Contributors: everpress, mailster, xaverb  
 Tags: mailster, delivery, newsletter, email, mailsteresp  
-Requires at least: 3.8  
-Tested up to: 6.0  
-Stable tag: 2.1  
+Requires at least: 6.0  
+Tested up to: 6.5  
+Stable tag: 2.1.1  
 License: GPLv2 or later
 
 ## Description
@@ -23,31 +23,35 @@ Uses SendGrid to deliver emails for the [Mailster Newsletter Plugin for WordPres
 
 ## Changelog
 
+### 2.1.1
+
+fixed: warning on PHP >8.1
+
 ### 2.1
 
--   fixed: issue with invalid data type with WP 5.5
+- fixed: issue with invalid data type with WP 5.5
 
 ### 2.0.2
 
--   fixed: issue with Mailster 2.3.16+ and reply_to headers
+- fixed: issue with Mailster 2.3.16+ and reply_to headers
 
 ### 2.0.1
 
--   fixed: undefined reply_to email address
+- fixed: undefined reply_to email address
 
 ### 2.0
 
--   switch to SendGrid API v3 requires now an API Key
--   embedded images works now with the WEB API
--   several improvements
+- switch to SendGrid API v3 requires now an API Key
+- embedded images works now with the WEB API
+- several improvements
 
 ### 1.0.1
 
--   fixed: issue with slashes in content when using the WEB API
+- fixed: issue with slashes in content when using the WEB API
 
 ### 1.0
 
--   initial release
+- initial release
 
 ## Additional Info
 
