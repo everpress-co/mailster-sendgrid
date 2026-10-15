@@ -9,11 +9,15 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Registers SendGrid as a Mailster delivery method and handles send and bounce flows.
+ *
+ * @since 2.0
  */
 class MailsterSendGrid {
 
 	/**
 	 * Absolute filesystem path to the plugin directory.
+	 *
+	 * @since 2.0
 	 *
 	 * @var string
 	 */
@@ -22,6 +26,8 @@ class MailsterSendGrid {
 	/**
 	 * URL to the plugin directory.
 	 *
+	 * @since 2.0
+	 *
 	 * @var string
 	 */
 	private $plugin_url;
@@ -29,12 +35,18 @@ class MailsterSendGrid {
 	/**
 	 * Temporary API key override used during verification.
 	 *
+	 * @since 2.0
+	 *
 	 * @var string|null
 	 */
 	private $apikey;
 
 	/**
 	 * Hooks activation, loads translations, and registers the init callback.
+	 *
+	 * @since 2.0
+	 *
+	 * @return void
 	 */
 	public function __construct() {
 
@@ -51,6 +63,8 @@ class MailsterSendGrid {
 
 	/**
 	 * Registers Mailster delivery hooks or shows the missing-Mailster notice.
+	 *
+	 * @since 2.0
 	 *
 	 * @return void
 	 */
@@ -89,6 +103,8 @@ class MailsterSendGrid {
 	 *
 	 * Uses the mailster_initsend hook to set initial settings.
 	 *
+	 * @since 2.0
+	 *
 	 * @param object $mailobject Mailster mail object.
 	 * @return void
 	 */
@@ -118,6 +134,8 @@ class MailsterSendGrid {
 	 * Builds the SendGrid payload before each message is sent.
 	 *
 	 * Uses the mailster_presend hook to apply settings before each mail.
+	 *
+	 * @since 2.0
 	 *
 	 * @param object $mailobject Mailster mail object.
 	 * @return void
@@ -240,6 +258,8 @@ class MailsterSendGrid {
 	 *
 	 * Uses the mailster_dosend hook and triggers the send.
 	 *
+	 * @since 2.0
+	 *
 	 * @param object $mailobject Mailster mail object.
 	 * @return void
 	 */
@@ -277,6 +297,8 @@ class MailsterSendGrid {
 	/**
 	 * Clears Mailster's send-period counters.
 	 *
+	 * @since 2.0
+	 *
 	 * @return void
 	 */
 	public function reset() {
@@ -287,8 +309,10 @@ class MailsterSendGrid {
 	/**
 	 * Prepares embedded images for a message body.
 	 *
+	 * @since 2.0
+	 *
 	 * @param string $message Message HTML.
-	 * @return array{files: array<string, string>, content: array<string, string>, html: string}
+	 * @return array{files: array<string, string>, content: array<string, string>, html: string} Embedded files, content IDs, and rewritten HTML.
 	 */
 	public function embedd_images( $message ) {
 
@@ -336,8 +360,10 @@ class MailsterSendGrid {
 	/**
 	 * Adds SendGrid to Mailster's delivery method list.
 	 *
+	 * @since 2.0
+	 *
 	 * @param array<string, string> $delivery_methods Delivery method labels keyed by slug.
-	 * @return array<string, string>
+	 * @return array<string, string> Delivery methods including SendGrid.
 	 */
 	public function delivery_method( $delivery_methods ) {
 		$delivery_methods['sendgrid'] = 'SendGrid';
@@ -346,6 +372,8 @@ class MailsterSendGrid {
 
 	/**
 	 * Renders the SendGrid delivery settings tab.
+	 *
+	 * @since 2.0
 	 *
 	 * @return void
 	 */
@@ -359,8 +387,10 @@ class MailsterSendGrid {
 	/**
 	 * Checks whether an API key can read SendGrid scopes.
 	 *
-	 * @param string|null $apikey API key to verify. Null uses the stored key.
-	 * @return bool
+	 * @since 2.0
+	 *
+	 * @param string|null $apikey Optional. API key to verify. Default null uses the stored key.
+	 * @return bool True when the key can read scopes, false otherwise.
 	 */
 	public function verify( $apikey = null ) {
 
@@ -378,8 +408,10 @@ class MailsterSendGrid {
 	/**
 	 * Verifies saved options and schedules the daily SendGrid reset.
 	 *
+	 * @since 2.0
+	 *
 	 * @param array<string, mixed> $options Mailster options being saved.
-	 * @return array<string, mixed>
+	 * @return array<string, mixed> Options, updated when verification changes them.
 	 */
 	public function verify_options( $options ) {
 
@@ -449,7 +481,9 @@ class MailsterSendGrid {
 	/**
 	 * Imports SendGrid suppressions and applies them as Mailster bounces.
 	 *
-	 * @return bool
+	 * @since 2.0
+	 *
+	 * @return bool False when the check is skipped, true after suppressions are imported.
 	 */
 	public function check_bounces() {
 
@@ -566,10 +600,12 @@ class MailsterSendGrid {
 	/**
 	 * Sends a GET request to the SendGrid API.
 	 *
+	 * @since 2.0
+	 *
 	 * @param string               $endpoint API path relative to /v3/.
-	 * @param array<string, mixed> $args     Query arguments.
-	 * @param int                  $timeout  Request timeout in seconds.
-	 * @return mixed|WP_Error
+	 * @param array<string, mixed> $args     Optional. Query arguments. Default empty array.
+	 * @param int                  $timeout  Optional. Request timeout in seconds. Default 15.
+	 * @return mixed|WP_Error Decoded JSON body, or WP_Error on failure.
 	 */
 	public function do_get( $endpoint, $args = array(), $timeout = 15 ) {
 		return $this->do_call( 'GET', $endpoint, $args, $timeout );
@@ -578,10 +614,12 @@ class MailsterSendGrid {
 	/**
 	 * Sends a POST request to the SendGrid API.
 	 *
+	 * @since 2.0
+	 *
 	 * @param string               $endpoint API path relative to /v3/.
-	 * @param array<string, mixed> $args     JSON body arguments.
-	 * @param int                  $timeout  Request timeout in seconds.
-	 * @return mixed|WP_Error
+	 * @param array<string, mixed> $args     Optional. JSON body arguments. Default empty array.
+	 * @param int                  $timeout  Optional. Request timeout in seconds. Default 15.
+	 * @return mixed|WP_Error Decoded JSON body, or WP_Error on failure.
 	 */
 	public function do_post( $endpoint, $args = array(), $timeout = 15 ) {
 		return $this->do_call( 'POST', $endpoint, $args, $timeout );
@@ -590,10 +628,12 @@ class MailsterSendGrid {
 	/**
 	 * Sends a DELETE request to the SendGrid API.
 	 *
+	 * @since 2.0
+	 *
 	 * @param string               $endpoint API path relative to /v3/.
-	 * @param array<string, mixed> $args     Request arguments.
-	 * @param int                  $timeout  Request timeout in seconds.
-	 * @return mixed|WP_Error
+	 * @param array<string, mixed> $args     Optional. Request arguments. Default empty array.
+	 * @param int                  $timeout  Optional. Request timeout in seconds. Default 15.
+	 * @return mixed|WP_Error Decoded JSON body, or WP_Error on failure.
 	 */
 	public function do_delete( $endpoint, $args = array(), $timeout = 15 ) {
 		return $this->do_call( 'DELETE', $endpoint, $args, $timeout );
@@ -602,11 +642,13 @@ class MailsterSendGrid {
 	/**
 	 * Performs an authenticated request against the SendGrid v3 API.
 	 *
+	 * @since 2.0
+	 *
 	 * @param string               $method   HTTP method. GET and POST are supported.
 	 * @param string               $endpoint API path relative to /v3/.
-	 * @param array<string, mixed> $args     Query or body arguments.
-	 * @param int                  $timeout  Request timeout in seconds.
-	 * @return mixed|WP_Error
+	 * @param array<string, mixed> $args     Optional. Query or body arguments. Default empty array.
+	 * @param int                  $timeout  Optional. Request timeout in seconds. Default 15.
+	 * @return mixed|WP_Error Decoded JSON body, or WP_Error on failure.
 	 */
 	private function do_call( $method, $endpoint, $args = array(), $timeout = 15 ) {
 
@@ -657,6 +699,8 @@ class MailsterSendGrid {
 	/**
 	 * Shows a note when SendGrid handles bounces.
 	 *
+	 * @since 2.0
+	 *
 	 * @return void
 	 */
 	public function section_tab_bounce() {
@@ -674,6 +718,8 @@ class MailsterSendGrid {
 	/**
 	 * Notice shown when Mailster is not available.
 	 *
+	 * @since 2.0
+	 *
 	 * @return void
 	 */
 	public function notice() {
@@ -688,6 +734,8 @@ class MailsterSendGrid {
 
 	/**
 	 * Sets default options and prompts the user to pick SendGrid.
+	 *
+	 * @since 2.0
 	 *
 	 * @return void
 	 */
@@ -719,6 +767,8 @@ class MailsterSendGrid {
 
 	/**
 	 * Falls back to the simple delivery method when SendGrid was active.
+	 *
+	 * @since 2.0
 	 *
 	 * @return void
 	 */
