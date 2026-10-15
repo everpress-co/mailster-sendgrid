@@ -3,7 +3,7 @@
 Contributors: everpress, mailster, xaverb  
 Tags: sendgrid, mailster, newsletter, email, mailsteresp  
 Requires at least: 6.0  
-Tested up to: 6.5  
+Tested up to: 7.1  
 Stable tag: 2.1.1  
 License: GPLv2 or later
 
@@ -84,13 +84,10 @@ For Mailster and this addon, see [mailster.co](https://mailster.co/?utm_campaign
 
 ## Changelog
 
-### Unreleased
-
-- fixed: API key status messages using the SparkPost translation domain
-
 ### 2.1.1
 
-fixed: warning on PHP >8.1
+- fixed: API key status messages using the SparkPost translation domain
+- fixed: warning on PHP >8.1
 
 ### 2.1
 
