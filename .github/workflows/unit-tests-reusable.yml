@@ -1,0 +1,69 @@
+---
+name: Unit tests (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      php-versions:
+        description: 'JSON array of PHP versions for the PHPCS matrix'
+        type: string
+        required: false
+        default: '["8.2"]'
+      run-js:
+        description: 'Whether to run JS lint/build'
+        type: boolean
+        required: false
+        default: true
+
+jobs:
+  js-unit:
+    name: JS lint and build
+    if: inputs.run-js
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint and build
+        run: |
+          npm run lint
+          npm run build --if-present
+
+  php-unit:
+    name: PHP coding standards (${{ matrix.php }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ${{ fromJSON(inputs.php-versions) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring
+          coverage: none
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v4
+        with:
+          composer-options: '--prefer-dist --no-interaction'
+
+      - name: Run PHPCS
+        run: composer run check-cs
