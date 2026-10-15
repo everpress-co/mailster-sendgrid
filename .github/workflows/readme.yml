@@ -1,22 +1,36 @@
 name: Plugin asset/readme update
+
 on:
   push:
     branches:
-      - 'develop'
+      - main
     paths:
-      - 'README.md'
-      - '.wordpress-org/**'
+      - README.md
+      - .wordpress-org/**
+
+concurrency:
+  group: wporg-svn
+  cancel-in-progress: false
+
 jobs:
-  trunk:
+  assets:
     name: Update Assets and Readme
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v5
+
+      - name: Convert README.md to WordPress readme.txt
+        uses: everpress-co/action-md2wp@main
+
       - uses: evrpress/action-wordpress-plugin-readme-screenshot-update@main
+
+      - name: Convert README.md to WordPress readme.txt
+        uses: everpress-co/action-md2wp@main
+
       - name: WordPress.org plugin asset/readme update
-        uses: evrpress/action-wordpress-plugin-asset-update@develop
+        uses: 10up/action-wordpress-plugin-asset-update@develop
         env:
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
-          README_NAME: README.md
+          README_NAME: readme.txt
           IGNORE_OTHER_FILES: true
