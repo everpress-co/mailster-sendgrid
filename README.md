@@ -23,6 +23,10 @@ Uses SendGrid to deliver emails for the [Mailster Newsletter Plugin for WordPres
 
 ## Changelog
 
+### Unreleased
+
+- fixed: API key status messages using the SparkPost translation domain
+
 ### 2.1.1
 
 fixed: warning on PHP >8.1

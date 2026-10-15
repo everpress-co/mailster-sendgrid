@@ -1,8 +1,34 @@
+<?php
+/**
+ * SendGrid delivery settings fields for the Mailster delivery tab.
+ *
+ * @package Mailster_SendGrid
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+?>
 <table class="form-table">
 	<?php if ( ! $verified ) : ?>
 	<tr valign="top">
 		<th scope="row">&nbsp;</th>
-		<td><p class="description"><?php echo sprintf( __( 'You need a %s account to use this service!', 'mailster-sendgrid' ), '<a href="https://app.sendgrid.com/settings/api_keys" class="external">SendGrid</a>' ); ?></p>
+		<td><p class="description">
+		<?php
+		echo wp_kses(
+			sprintf(
+				/* translators: %s: SendGrid API keys page link */
+				__( 'You need a %s account to use this service!', 'mailster-sendgrid' ),
+				'<a href="https://app.sendgrid.com/settings/api_keys" class="external">SendGrid</a>'
+			),
+			array(
+				'a' => array(
+					'href'  => true,
+					'class' => true,
+				),
+			)
+		);
+		?>
+		</p>
 		</td>
 	</tr>
 	<?php endif; ?>
@@ -14,12 +40,12 @@
 		<th scope="row">&nbsp;</th>
 		<td>
 			<?php if ( $verified ) : ?>
-			<span style="color:#3AB61B">&#10004;</span> <?php esc_html_e( 'Your API Key is ok!', 'mailster-sparkpost' ); ?>
+			<span style="color:#3AB61B">&#10004;</span> <?php esc_html_e( 'Your API Key is ok!', 'mailster-sendgrid' ); ?>
 			<?php else : ?>
-			<span style="color:#D54E21">&#10006;</span> <?php esc_html_e( 'Your API Key is WRONG!', 'mailster-sparkpost' ); ?>
+			<span style="color:#D54E21">&#10006;</span> <?php esc_html_e( 'Your API Key is WRONG!', 'mailster-sendgrid' ); ?>
 			<?php endif; ?>
 
-			<input type="hidden" name="mailster_options[sendgrid_verified]" value="<?php echo $verified; ?>">
+			<input type="hidden" name="mailster_options[sendgrid_verified]" value="<?php echo esc_attr( $verified ); ?>">
 		</td>
 	</tr>
 </table>
@@ -41,7 +67,23 @@
 	<tr valign="top">
 		<th scope="row"><?php esc_html_e( 'Categories', 'mailster-sendgrid' ); ?></th>
 		<td><input type="text" name="mailster_options[sendgrid_categories]" value="<?php echo esc_attr( mailster_option( 'sendgrid_categories' ) ); ?>" class="large-text">
-		<p class="howto"><?php echo sprintf( __( 'Define up to 10 %s, separated with commas which get send via SendGrid X-SMTPAPI', 'mailster-sendgrid' ), '<a href="https://sendgrid.com/docs/API_Reference/SMTP_API/categories.html" class="external">' . __( 'Categories', 'mailster-sendgrid' ) . '</a>' ); ?></p>
+		<p class="howto">
+		<?php
+		echo wp_kses(
+			sprintf(
+				/* translators: %s: SendGrid categories documentation link */
+				__( 'Define up to 10 %s, separated with commas which get send via SendGrid X-SMTPAPI', 'mailster-sendgrid' ),
+				'<a href="https://sendgrid.com/docs/API_Reference/SMTP_API/categories.html" class="external">' . esc_html__( 'Categories', 'mailster-sendgrid' ) . '</a>'
+			),
+			array(
+				'a' => array(
+					'href'  => true,
+					'class' => true,
+				),
+			)
+		);
+		?>
+		</p>
 	</td>
 	</tr>
 	<tr valign="top">

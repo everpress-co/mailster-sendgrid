@@ -1,11 +1,41 @@
 <?php
+/**
+ * SendGrid delivery integration for Mailster.
+ *
+ * @package Mailster_SendGrid
+ */
 
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Registers SendGrid as a Mailster delivery method and handles send and bounce flows.
+ */
 class MailsterSendGrid {
 
+	/**
+	 * Absolute filesystem path to the plugin directory.
+	 *
+	 * @var string
+	 */
 	private $plugin_path;
+
+	/**
+	 * URL to the plugin directory.
+	 *
+	 * @var string
+	 */
 	private $plugin_url;
+
+	/**
+	 * Temporary API key override used during verification.
+	 *
+	 * @var string|null
+	 */
 	private $apikey;
 
+	/**
+	 * Hooks activation, loads translations, and registers the init callback.
+	 */
 	public function __construct() {
 
 		$this->plugin_path = plugin_dir_path( MAILSTER_SENDGRID_FILE );
@@ -19,11 +49,9 @@ class MailsterSendGrid {
 		add_action( 'init', array( &$this, 'init' ), 1 );
 	}
 
-
-	/*
-	 * init the plugin
+	/**
+	 * Registers Mailster delivery hooks or shows the missing-Mailster notice.
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function init() {
@@ -39,7 +67,7 @@ class MailsterSendGrid {
 
 			add_filter( 'mailster_verify_options', array( &$this, 'verify_options' ) );
 
-			if ( mailster_option( 'deliverymethod' ) == 'sendgrid' ) {
+			if ( 'sendgrid' === mailster_option( 'deliverymethod' ) ) {
 				add_action( 'mailster_initsend', array( &$this, 'initsend' ) );
 				add_action( 'mailster_presend', array( &$this, 'presend' ) );
 				add_action( 'mailster_dosend', array( &$this, 'dosend' ) );
@@ -49,27 +77,26 @@ class MailsterSendGrid {
 				add_action( 'mailster_section_tab_bounce', array( &$this, 'section_tab_bounce' ) );
 
 				if ( mailster_option( 'sendgrid_user' ) ) {
+					/* translators: %s: HTML link to the Mailster delivery settings page */
 					mailster_notice( sprintf( __( 'SendGrid now requires an API key. Please visit the %s and update your information!', 'mailster-sendgrid' ), '<a href="edit.php?post_type=newsletter&page=mailster_settings&mailster_remove_notice=sendgrid_update_required#delivery">Settings Page</a>' ), 'info', 7200, 'sendgrid_update_required' );
 				}
 			}
 		}
 	}
 
-
 	/**
-	 * initsend function.
+	 * Applies SendGrid transport settings before a send starts.
 	 *
-	 * uses mailster_initsend hook to set initial settings
+	 * Uses the mailster_initsend hook to set initial settings.
 	 *
-	 * @access public
+	 * @param object $mailobject Mailster mail object.
 	 * @return void
-	 * @param mixed $mailobject
 	 */
 	public function initsend( $mailobject ) {
 
 		$method = mailster_option( 'sendgrid_api' );
 
-		if ( $method == 'smtp' ) {
+		if ( 'smtp' === $method ) {
 
 			$secure = mailster_option( 'sendgrid_secure' );
 
@@ -81,39 +108,34 @@ class MailsterSendGrid {
 			$mailobject->mailer->Username      = 'apikey';
 			$mailobject->mailer->Password      = mailster_option( 'sendgrid_apikey' );
 			$mailobject->mailer->SMTPKeepAlive = true;
-
-		} elseif ( $method == 'web' ) {
-
 		}
 
-		// SendGrid will handle DKIM integration
+		// SendGrid will handle DKIM integration.
 		$mailobject->dkim = false;
 	}
 
-
 	/**
-	 * presend function.
+	 * Builds the SendGrid payload before each message is sent.
 	 *
-	 * uses the mailster_presend hook to apply settings before each mail
+	 * Uses the mailster_presend hook to apply settings before each mail.
 	 *
-	 * @access public
+	 * @param object $mailobject Mailster mail object.
 	 * @return void
-	 * @param mixed $mailobject
 	 */
 	public function presend( $mailobject ) {
 
 		$method = mailster_option( 'sendgrid_api' );
 
-		if ( $method == 'smtp' ) {
+		if ( 'smtp' === $method ) {
 
 			if ( ! empty( $xsmtpapi ) ) {
-				$mailobject->add_header( 'X-SMTPAPI', json_encode( $xsmtpapi ) );
+				$mailobject->add_header( 'X-SMTPAPI', wp_json_encode( $xsmtpapi ) );
 			}
 
-			// use pre_send from the main class
+			// Use pre_send from the main class.
 			$mailobject->pre_send();
 
-		} elseif ( $method == 'web' ) {
+		} elseif ( 'web' === $method ) {
 
 			$mailobject->pre_send();
 
@@ -128,9 +150,9 @@ class MailsterSendGrid {
 					'name'  => $mailobject->to_name[ $i ] ? $mailobject->to_name[ $i ] : null,
 					'email' => $mailobject->to[ $i ] ? $mailobject->to[ $i ] : null,
 				);
-
 			}
 
+			// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Mailster mail object properties.
 			$mailobject->sendgrid_object = array(
 				'personalizations' => array(
 					array(
@@ -161,6 +183,7 @@ class MailsterSendGrid {
 				),
 
 			);
+			// phpcs:enable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 			$reply_to = is_array( $mailobject->reply_to ) ? reset( $mailobject->reply_to ) : $mailobject->reply_to;
 
@@ -190,13 +213,14 @@ class MailsterSendGrid {
 				foreach ( $attachments as $attachment ) {
 					if ( file_exists( $attachment[0] ) ) {
 						$object = (object) array(
+							// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents,WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Local attachment path; SendGrid API requires a base64 payload.
 							'content'     => base64_encode( file_get_contents( $attachment[0] ) ),
 							'filename'    => $attachment[1],
 							'type'        => $attachment[4],
 							'disposition' => $attachment[6],
 						);
 
-						if ( 'inline' == $attachment[6] ) {
+						if ( 'inline' === $attachment[6] ) {
 							$object->content_id = $attachment[7];
 						}
 
@@ -211,26 +235,24 @@ class MailsterSendGrid {
 		}
 	}
 
-
 	/**
-	 * dosend function.
+	 * Sends the current message through SMTP or the SendGrid Web API.
 	 *
-	 * uses the mailster_dosend hook and triggers the send
+	 * Uses the mailster_dosend hook and triggers the send.
 	 *
-	 * @access public
-	 * @param mixed $mailobject
+	 * @param object $mailobject Mailster mail object.
 	 * @return void
 	 */
 	public function dosend( $mailobject ) {
 
 		$method = mailster_option( 'sendgrid_api' );
 
-		if ( $method == 'smtp' ) {
+		if ( 'smtp' === $method ) {
 
-			// use send from the main class
+			// Use send from the main class.
 			$mailobject->do_send();
 
-		} elseif ( $method == 'web' ) {
+		} elseif ( 'web' === $method ) {
 
 			if ( ! isset( $mailobject->sendgrid_object ) ) {
 				$mailobject->set_error( __( 'SendGrid options not defined', 'mailster-sendgrid' ) );
@@ -252,34 +274,21 @@ class MailsterSendGrid {
 		}
 	}
 
-
-
-
 	/**
-	 * reset function.
+	 * Clears Mailster's send-period counters.
 	 *
-	 * resets the current time
-	 *
-	 * @access public
-	 * @param mixed $message
-	 * @return array
+	 * @return void
 	 */
 	public function reset() {
 		update_option( '_transient__mailster_send_period_timeout', false );
 		update_option( '_transient__mailster_send_period', 0 );
 	}
 
-
-
-
 	/**
-	 * embedd_images function.
+	 * Prepares embedded images for a message body.
 	 *
-	 * prepares the array for embedded images
-	 *
-	 * @access public
-	 * @param mixed $message
-	 * @return array
+	 * @param string $message Message HTML.
+	 * @return array{files: array<string, string>, content: array<string, string>, html: string}
 	 */
 	public function embedd_images( $message ) {
 
@@ -300,10 +309,10 @@ class MailsterSendGrid {
 				if ( empty( $url ) ) {
 					continue;
 				}
-				if ( substr( $url, 0, 7 ) == 'http://' ) {
+				if ( 'http://' === substr( $url, 0, 7 ) ) {
 					continue;
 				}
-				if ( substr( $url, 0, 8 ) == 'https://' ) {
+				if ( 'https://' === substr( $url, 0, 8 ) ) {
 					continue;
 				}
 				if ( ! file_exists( $folder . '/' . $url ) ) {
@@ -311,11 +320,12 @@ class MailsterSendGrid {
 				}
 				$filename  = basename( $url );
 				$directory = dirname( $url );
-				if ( $directory == '.' ) {
+				if ( '.' === $directory ) {
 					$directory = '';
 				}
-				$cid                            = md5( $folder . '/' . $url . time() );
-				$return['html']                 = str_replace( $url, 'cid:' . $cid, $return['html'] );
+				$cid            = md5( $folder . '/' . $url . time() );
+				$return['html'] = str_replace( $url, 'cid:' . $cid, $return['html'] );
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local upload path.
 				$return['files'][ $filename ]   = file_get_contents( $folder . '/' . $url );
 				$return['content'][ $filename ] = $cid;
 			}
@@ -323,30 +333,20 @@ class MailsterSendGrid {
 		return $return;
 	}
 
-
-
-
 	/**
-	 * delivery_method function.
+	 * Adds SendGrid to Mailster's delivery method list.
 	 *
-	 * add the delivery method to the options
-	 *
-	 * @access public
-	 * @param mixed $delivery_methods
-	 * @return void
+	 * @param array<string, string> $delivery_methods Delivery method labels keyed by slug.
+	 * @return array<string, string>
 	 */
 	public function delivery_method( $delivery_methods ) {
 		$delivery_methods['sendgrid'] = 'SendGrid';
 		return $delivery_methods;
 	}
 
-
 	/**
-	 * deliverytab function.
+	 * Renders the SendGrid delivery settings tab.
 	 *
-	 * the content of the tab for the options
-	 *
-	 * @access public
 	 * @return void
 	 */
 	public function deliverytab() {
@@ -357,13 +357,10 @@ class MailsterSendGrid {
 	}
 
 	/**
-	 * verify_options function.
+	 * Checks whether an API key can read SendGrid scopes.
 	 *
-	 * some verification if options are saved
-	 *
-	 * @access public
-	 * @param unknown $apikey  (optional)
-	 * @return void
+	 * @param string|null $apikey API key to verify. Null uses the stored key.
+	 * @return bool
 	 */
 	public function verify( $apikey = null ) {
 
@@ -373,45 +370,42 @@ class MailsterSendGrid {
 
 		if ( is_wp_error( $response ) ) {
 			return false;
-		} else {
-			return true;
 		}
+
+		return true;
 	}
 
-
-
 	/**
-	 * verify_options function.
+	 * Verifies saved options and schedules the daily SendGrid reset.
 	 *
-	 * some verification if options are saved
-	 *
-	 * @access public
-	 * @param mixed $options
-	 * @return void
+	 * @param array<string, mixed> $options Mailster options being saved.
+	 * @return array<string, mixed>
 	 */
 	public function verify_options( $options ) {
 
-		if ( $timestamp = wp_next_scheduled( 'mailster_sendgrid_cron' ) ) {
+		$timestamp = wp_next_scheduled( 'mailster_sendgrid_cron' );
+		if ( $timestamp ) {
 			wp_unschedule_event( $timestamp, 'mailster_sendgrid_cron' );
 		}
 
-		if ( $options['deliverymethod'] == 'sendgrid' ) {
+		if ( 'sendgrid' === $options['deliverymethod'] ) {
 
 			$old_apikey = mailster_option( 'sendgrid_apikey' );
 
-			if ( $old_apikey != $options['sendgrid_apikey']
+			if ( $old_apikey !== $options['sendgrid_apikey']
 				|| ! mailster_option( 'sendgrid_verified' ) || ! $options['sendgrid_apikey'] ) {
 
 				$options['sendgrid_verified'] = $this->verify( $options['sendgrid_apikey'] );
 
 				if ( $options['sendgrid_verified'] ) {
+					/* translators: %s: HTML link to the SendGrid billing page */
 					add_settings_error( 'mailster_options', 'mailster_options', sprintf( __( 'Please update your sending limits! %s', 'mailster-sendgrid' ), '<a href="https://app.sendgrid.com/settings/billing" class="external">SendGrid Dashboard</a>' ) );
 
 				}
 			}
 
 			if ( ! wp_next_scheduled( 'mailster_sendgrid_cron' ) ) {
-				// reset on 00:00 PST ( GMT -8 ) == GMT +16
+				// Reset on 00:00 PST ( GMT -8 ) == GMT +16.
 				$timeoffset = strtotime( 'midnight' ) + ( ( 24 - 8 ) * HOUR_IN_SECONDS );
 				if ( $timeoffset < time() ) {
 					$timeoffset + ( 24 * HOUR_IN_SECONDS );
@@ -419,29 +413,32 @@ class MailsterSendGrid {
 				wp_schedule_event( $timeoffset, 'daily', 'mailster_sendgrid_cron' );
 			}
 
-			if ( $options['sendgrid_api'] == 'smtp' ) {
+			if ( 'smtp' === $options['sendgrid_api'] ) {
 				if ( function_exists( 'fsockopen' ) ) {
 					$host = 'smtp.sendgrid.net';
 					$port = $options['sendgrid_secure'] ? 465 : 587;
+					// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fsockopen -- SMTP port reachability probe.
 					$conn = fsockopen( $host, $port, $errno, $errstr, 15 );
 
 					if ( is_resource( $conn ) ) {
 
+						// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Paired with the fsockopen probe above.
 						fclose( $conn );
 
 					} else {
 
+						/* translators: %s: blocked SMTP port number */
 						add_settings_error( 'mailster_options', 'mailster_options', sprintf( __( 'Not able to use SendGrid with SMTP API cause of the blocked port %s! Please send with the WEB API or choose a different delivery method!', 'mailster-sendgrid' ), $port ) );
 
 					}
 				}
-			} elseif ( $options['sendgrid_bouncehandling'] != 'sendgrid' ) {
+			} elseif ( 'sendgrid' !== $options['sendgrid_bouncehandling'] ) {
 
-					add_settings_error( 'mailster_options', 'mailster_options', __( 'It is currently not possible to handle bounces with Mailster when using the WEB API', 'mailster-sendgrid' ) );
-					$options['sendgrid_bouncehandling'] = 'sendgrid';
+				add_settings_error( 'mailster_options', 'mailster_options', __( 'It is currently not possible to handle bounces with Mailster when using the WEB API', 'mailster-sendgrid' ) );
+				$options['sendgrid_bouncehandling'] = 'sendgrid';
 			}
 
-			if ( $options['sendgrid_bouncehandling'] != 'sendgrid' ) {
+			if ( 'sendgrid' !== $options['sendgrid_bouncehandling'] ) {
 				add_settings_error( 'mailster_options', 'mailster_options', sprintf( __( 'Please make sure your SendGrid Account "preserve headers" otherwise Mailster is not able to handle bounces', 'mailster-sendgrid' ), $port ) );
 			}
 		}
@@ -449,14 +446,10 @@ class MailsterSendGrid {
 		return $options;
 	}
 
-
 	/**
-	 * check_bounces function.
+	 * Imports SendGrid suppressions and applies them as Mailster bounces.
 	 *
-	 * checks for bounces and reset them if needed
-	 *
-	 * @access public
-	 * @return void
+	 * @return bool
 	 */
 	public function check_bounces() {
 
@@ -466,7 +459,8 @@ class MailsterSendGrid {
 
 		$now = time();
 
-		if ( ! ( $last_bounce_check = get_transient( '_mailster_sendgrid_last_bounce_check' ) ) ) {
+		$last_bounce_check = get_transient( '_mailster_sendgrid_last_bounce_check' );
+		if ( ! $last_bounce_check ) {
 			set_transient( '_mailster_sendgrid_last_bounce_check', $now );
 			$last_bounce_check = $now;
 		}
@@ -477,6 +471,7 @@ class MailsterSendGrid {
 		$response = $this->do_get( 'suppression/bounces', array( 'start_time' => $last_bounce_check ) );
 
 		if ( is_wp_error( $response ) ) {
+			/* translators: %s: SendGrid API error message */
 			$errormessages[]       = sprintf( __( 'Cannot read Bounces: %s', 'mailster-sendgrid' ), $response->get_error_message() );
 			$collection['bounces'] = array();
 		} else {
@@ -486,6 +481,7 @@ class MailsterSendGrid {
 		$response = $this->do_get( 'suppression/blocks', array( 'start_time' => $last_bounce_check ) );
 
 		if ( is_wp_error( $response ) ) {
+			/* translators: %s: SendGrid API error message */
 			$errormessages[]      = sprintf( __( 'Cannot read Blocks: %s', 'mailster-sendgrid' ), $response->get_error_message() );
 			$collection['blocks'] = array();
 		} else {
@@ -495,6 +491,7 @@ class MailsterSendGrid {
 		$response = $this->do_get( 'suppression/spam_reports', array( 'start_time' => $last_bounce_check ) );
 
 		if ( is_wp_error( $response ) ) {
+			/* translators: %s: SendGrid API error message */
 			$errormessages[]            = sprintf( __( 'Cannot read Spam reports: %s', 'mailster-sendgrid' ), $response->get_error_message() );
 			$collection['spam_reports'] = array();
 		} else {
@@ -504,6 +501,7 @@ class MailsterSendGrid {
 		$response = $this->do_get( 'suppression/unsubscribes', array( 'start_time' => $last_bounce_check ) );
 
 		if ( is_wp_error( $response ) ) {
+			/* translators: %s: SendGrid API error message */
 			$errormessages[]            = sprintf( __( 'Cannot read Unsubscribes: %s', 'mailster-sendgrid' ), $response->get_error_message() );
 			$collection['unsubscribes'] = array();
 		} else {
@@ -516,14 +514,15 @@ class MailsterSendGrid {
 
 				$subscriber = mailster( 'subscribers' )->get_by_mail( $message->email );
 
-				// only if user exists
-				if ( $subscriber && $subscriber->status == 1 ) {
+				// Only if the subscriber exists and is active.
+				// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Mailster subscriber object.
+				if ( $subscriber && 1 === (int) $subscriber->status ) {
 
 					$campaigns    = mailster( 'subscribers' )->get_sent_campaigns( $subscriber->ID );
 					$campaigns    = array_reverse( $campaigns );
 					$campaign_ids = wp_list_pluck( $campaigns, 'campaign_id' );
 
-					if ( 'unsubscribes' == $type ) {
+					if ( 'unsubscribes' === $type ) {
 
 						$campaign_id = isset( $campaigns[0] ) ? $campaigns[0]->campaign_id : null;
 
@@ -531,13 +530,13 @@ class MailsterSendGrid {
 
 					} else {
 
-						// any code with 5 eg 5.x.x or a spamreport or bocks
-						$is_hard_bounce = in_array( $type, array( 'spam_reports', 'blocks' ) ) || substr( $message->status, 0, 1 ) == 5;
+						// Any code with 5, for example 5.x.x, or a spam report or block.
+						$is_hard_bounce = in_array( $type, array( 'spam_reports', 'blocks' ), true ) || '5' === substr( (string) $message->status, 0, 1 );
 
 						if ( ! empty( $campaigns ) ) {
 							foreach ( $campaigns as $i => $campaign ) {
 
-								// only the last 20 campaigns
+								// Only the last 20 campaigns.
 								if ( $i >= 20 ) {
 									break;
 								}
@@ -549,7 +548,6 @@ class MailsterSendGrid {
 							mailster( 'subscribers' )->bounce( $subscriber->ID, null, $is_hard_bounce, $message->reason );
 						}
 					}
-				} else {
 				}
 			}
 		}
@@ -561,25 +559,54 @@ class MailsterSendGrid {
 		}
 
 		set_transient( '_mailster_sendgrid_last_bounce_check', $now );
+
+		return true;
 	}
 
-
+	/**
+	 * Sends a GET request to the SendGrid API.
+	 *
+	 * @param string               $endpoint API path relative to /v3/.
+	 * @param array<string, mixed> $args     Query arguments.
+	 * @param int                  $timeout  Request timeout in seconds.
+	 * @return mixed|WP_Error
+	 */
 	public function do_get( $endpoint, $args = array(), $timeout = 15 ) {
 		return $this->do_call( 'GET', $endpoint, $args, $timeout );
 	}
+
+	/**
+	 * Sends a POST request to the SendGrid API.
+	 *
+	 * @param string               $endpoint API path relative to /v3/.
+	 * @param array<string, mixed> $args     JSON body arguments.
+	 * @param int                  $timeout  Request timeout in seconds.
+	 * @return mixed|WP_Error
+	 */
 	public function do_post( $endpoint, $args = array(), $timeout = 15 ) {
 		return $this->do_call( 'POST', $endpoint, $args, $timeout );
 	}
+
+	/**
+	 * Sends a DELETE request to the SendGrid API.
+	 *
+	 * @param string               $endpoint API path relative to /v3/.
+	 * @param array<string, mixed> $args     Request arguments.
+	 * @param int                  $timeout  Request timeout in seconds.
+	 * @return mixed|WP_Error
+	 */
 	public function do_delete( $endpoint, $args = array(), $timeout = 15 ) {
 		return $this->do_call( 'DELETE', $endpoint, $args, $timeout );
 	}
 
-
 	/**
+	 * Performs an authenticated request against the SendGrid v3 API.
 	 *
-	 * @access public
-	 * @param unknown $apikey  (optional)
-	 * @return void
+	 * @param string               $method   HTTP method. GET and POST are supported.
+	 * @param string               $endpoint API path relative to /v3/.
+	 * @param array<string, mixed> $args     Query or body arguments.
+	 * @param int                  $timeout  Request timeout in seconds.
+	 * @return mixed|WP_Error
 	 */
 	private function do_call( $method, $endpoint, $args = array(), $timeout = 15 ) {
 
@@ -589,10 +616,10 @@ class MailsterSendGrid {
 		$body   = null;
 		$apikey = isset( $this->apikey ) ? $this->apikey : mailster_option( 'sendgrid_apikey' );
 
-		if ( 'GET' == $method ) {
+		if ( 'GET' === $method ) {
 			$url = add_query_arg( $args, $url );
-		} elseif ( 'POST' == $method ) {
-			$body = json_encode( $args );
+		} elseif ( 'POST' === $method ) {
+			$body = wp_json_encode( $args );
 		} else {
 			return new WP_Error( 'method_not_allowed', 'This method is not allowed' );
 		}
@@ -616,10 +643,10 @@ class MailsterSendGrid {
 			return $response;
 		}
 
-		$code = wp_remote_retrieve_response_code( $response );
+		$code = (int) wp_remote_retrieve_response_code( $response );
 		$body = json_decode( wp_remote_retrieve_body( $response ) );
 
-		if ( $code != 200 && $code != 202 && $code != 204 ) {
+		if ( ! in_array( $code, array( 200, 202, 204 ), true ) ) {
 			$errors = array_unique( wp_list_pluck( $body->errors, 'message' ) );
 			return new WP_Error( $code, implode( ', ', $errors ) );
 		}
@@ -627,19 +654,14 @@ class MailsterSendGrid {
 		return $body;
 	}
 
-
 	/**
-	 * section_tab_bounce function.
+	 * Shows a note when SendGrid handles bounces.
 	 *
-	 * displays a note on the bounce tab
-	 *
-	 * @access public
-	 * @param mixed $options
 	 * @return void
 	 */
 	public function section_tab_bounce() {
 
-		if ( mailster_option( 'sendgrid_bouncehandling' ) != 'sendgrid' ) {
+		if ( 'sendgrid' !== mailster_option( 'sendgrid_bouncehandling' ) ) {
 			return;
 		}
 
@@ -649,36 +671,31 @@ class MailsterSendGrid {
 		<?php
 	}
 
-
-
 	/**
-	 * Notice if Mailster is not available
+	 * Notice shown when Mailster is not available.
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function notice() {
 		?>
 	<div id="message" class="error">
 		<p>
-		<strong>SendGrid integration for Mailster</strong> requires the <a href="https://mailster.co/?utm_campaign=wporg&utm_source=wordpress.org&utm_medium=plugin&utm_term=SendGrid">Mailster Newsletter Plugin</a>, at least version <strong><?php echo MAILSTER_SENDGRID_REQUIRED_VERSION; ?></strong>.
+		<strong>SendGrid integration for Mailster</strong> requires the <a href="https://mailster.co/?utm_campaign=wporg&utm_source=wordpress.org&utm_medium=plugin&utm_term=SendGrid">Mailster Newsletter Plugin</a>, at least version <strong><?php echo esc_html( MAILSTER_SENDGRID_REQUIRED_VERSION ); ?></strong>.
 		</p>
 	</div>
 		<?php
 	}
 
-
-
 	/**
-	 * activate function
+	 * Sets default options and prompts the user to pick SendGrid.
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function activate() {
 
 		if ( function_exists( 'mailster' ) ) {
 
+			/* translators: %s: HTML link to the Mailster delivery settings page */
 			mailster_notice( sprintf( __( 'Change the delivery method on the %s!', 'mailster-sendgrid' ), '<a href="edit.php?post_type=newsletter&page=mailster_settings&mailster_remove_notice=delivery_method#delivery">Settings Page</a>' ), '', 360, 'delivery_method' );
 
 			$defaults = array(
@@ -700,18 +717,17 @@ class MailsterSendGrid {
 		}
 	}
 
-
 	/**
-	 * deactivate function
+	 * Falls back to the simple delivery method when SendGrid was active.
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function deactivate() {
 
 		if ( function_exists( 'mailster' ) ) {
-			if ( mailster_option( 'deliverymethod' ) == 'sendgrid' ) {
+			if ( 'sendgrid' === mailster_option( 'deliverymethod' ) ) {
 				mailster_update_option( 'deliverymethod', 'simple' );
+				/* translators: %s: HTML link to the Mailster delivery settings page */
 				mailster_notice( sprintf( __( 'Change the delivery method on the %s!', 'mailster-sendgrid' ), '<a href="edit.php?post_type=newsletter&page=mailster_settings&mailster_remove_notice=delivery_method#delivery">Settings Page</a>' ), '', 360, 'delivery_method' );
 			}
 		}

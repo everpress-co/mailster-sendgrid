@@ -1,16 +1,19 @@
 <?php
-/*
-Plugin Name: Mailster SendGrid Integration
-Requires Plugins: mailster
-Plugin URI: https://mailster.co/?utm_campaign=wporg&utm_source=wordpress.org&utm_medium=plugin&utm_term=SendGrid
-Description: Uses SendGrid to deliver emails for the Mailster Newsletter Plugin for WordPress.
-Version: 2.1.1
-Author: EverPress
-Author URI: https://mailster.co
-Text Domain: mailster-sendgrid
-License: GPLv2 or later
-*/
+/**
+ * Plugin Name: Mailster SendGrid Integration
+ * Requires Plugins: mailster
+ * Plugin URI: https://mailster.co/?utm_campaign=wporg&utm_source=wordpress.org&utm_medium=plugin&utm_term=SendGrid
+ * Description: Uses SendGrid to deliver emails for the Mailster Newsletter Plugin for WordPress.
+ * Version: 2.1.1
+ * Author: EverPress
+ * Author URI: https://mailster.co
+ * Text Domain: mailster-sendgrid
+ * License: GPLv2 or later
+ *
+ * @package Mailster_SendGrid
+ */
 
+defined( 'ABSPATH' ) || exit;
 
 define( 'MAILSTER_SENDGRID_VERSION', '2.1.1' );
 define( 'MAILSTER_SENDGRID_REQUIRED_VERSION', '4.0' );

@@ -1,0 +1,35 @@
+{
+	"name": "mailster-sendgrid",
+	"version": "2.1.1",
+	"description": "SendGrid delivery integration for Mailster.",
+	"author": "everpress",
+	"license": "GPL-2.0-or-later",
+	"keywords": [
+		"sendgrid",
+		"mailster",
+		"newsletter",
+		"email"
+	],
+	"homepage": "https://mailster.co",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/everpress-co/mailster-sendgrid.git"
+	},
+	"bugs": {
+		"url": "https://github.com/everpress-co/mailster-sendgrid/issues"
+	},
+	"files": [
+		"*.php",
+		"classes",
+		"views",
+		"readme.txt"
+	],
+	"devDependencies": {
+		"@wordpress/scripts": "^36.1.0"
+	},
+	"scripts": {
+		"lint": "npm run lint:pkg-json",
+		"lint:pkg-json": "wp-scripts lint-pkg-json",
+		"plugin-zip": "wp-scripts plugin-zip"
+	}
+}
